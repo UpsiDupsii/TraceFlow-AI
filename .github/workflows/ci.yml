@@ -1,0 +1,23 @@
+name: TraceFlow AI CI Pipeline
+
+# Trigger this action on every Push or Pull Request to the main branch
+on:
+  push:
+    branches: [ "main", "staging" ]
+  pull_request:
+    branches: [ "main", "staging" ]
+
+jobs:
+  recruiter-demo-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4
+
+    - name: Run Demo Pipeline Action
+      run: |
+        echo "=========================================================="
+        echo " Hello Recruiter! This pipeline triggers on Push/PRs. "
+        echo " Automated CI environment initialized successfully.       "
+        echo "=========================================================="
