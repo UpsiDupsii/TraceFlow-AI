@@ -7,7 +7,6 @@ on:
     branches: [ "main", "staging" ]
 
 jobs:
-  # Job 1: Linting and Syntax Quality Assurance
   code-quality:
     name: Code Quality and Linting
     runs-on: ubuntu-latest
@@ -31,7 +30,6 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-  # Job 2: Dependency Verification and Testing
   test-suite:
     name: Automated Test Execution
     runs-on: ubuntu-latest
@@ -50,7 +48,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Safe execution using the mock data strategies engineered in pytest
       - name: Run Unit and Integration Tests
+        env:
+          PROJECT_NAME: "TraceFlow-AI-Test"
+          VERSION: "0.1.0"
+          API_V1_STR: "/api/v1"
+          ENVIRONMENT: "testing"
+          OLLAMA_BASE_URL: "http://localhost:11434"
+          DEFAULT_MODEL: "qwen2.5:3b"
         run: |
           if [ -d tests ] || ls test_*.py &> /dev/null; then
             pytest
@@ -58,7 +64,6 @@ jobs:
             echo "INFO: Test environment verified. Ready for custom PyTest suites."
           fi
 
-  # Job 3: Build & Compilation Verification
   build-artifact:
     name: Application Compile Verification
     needs: [code-quality, test-suite]
