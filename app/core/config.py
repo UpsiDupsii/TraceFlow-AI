@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     # LLM CONFIGURATIONS
     OLLAMA_BASE_URL: str
     DEFAULT_MODEL: str
+    
+    # INFRASTRUCTURE CONFIGURATIONS
+    KAFKA_BOOTSTRAP_SERVERS: str
+    REDIS_URL: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
