@@ -23,3 +23,7 @@ class JobResponse(BaseModel):
     latency_ms: Optional[float] = None
     message: str
     
+class JobAcceptedResponse(BaseModel):
+    job_id: str
+    status: str = "PENDING"
+    message: str = "Job accepted and queued for background execution."
