@@ -57,6 +57,8 @@ jobs:
           ENVIRONMENT: "testing"
           OLLAMA_BASE_URL: "http://localhost:11434"
           DEFAULT_MODEL: "qwen2.5:3b"
+          KAFKA_BOOTSTRAP_SERVERS: "localhost:9092"
+          REDIS_URL: "redis://localhost:6379/0"
         run: |
           if [ -d tests ] || ls test_*.py &> /dev/null; then
             pytest
