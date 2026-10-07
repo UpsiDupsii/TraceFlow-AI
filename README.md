@@ -14,11 +14,12 @@ flowchart TD
     Gateway -->|2. HTTP 202 Accepted| Client
     Gateway -->|3. Publish Event| Kafka[Apache Kafka Broker]
     Gateway <-->|4. Read/Write State| Redis[(Redis Hot Cache)]
-    Kafka -->|5. Consume Event| Worker[Kafka Consumer Worker]
+    Kafka -->|5. Consume Event| Worker[Standalone Kafka Worker]
     Worker -->|6. Async LLM Request| Ollama[Ollama Service qwen2.5:3b]
     Ollama -->|7. Generation Output| Worker
     Worker -->|8. Update COMPLETED State| Redis
-    Client -.->|9. GET /api/v1/jobs/id| Gateway
+    Worker -->|9. On Failure (Retry Exhausted)| DLQ[(Kafka DLQ Topic)]
+    Client -.->|10. GET /api/v1/jobs/id| Gateway
 
 ```
 
@@ -27,6 +28,8 @@ flowchart TD
 ## Key Capabilities
 
 * **Asynchronous Non-Blocking Gateway:** Returns `HTTP 202 Accepted` immediately upon ingestion, keeping client latency under 30ms regardless of model response time.
+* **True Decoupling:** API ingestion and background execution run as completely independent processes, allowing independent scaling.
+* **Resilience & Fault Tolerance:** Implements exponential backoff retries for LLM inferences and routes poisoned messages to a Dead Letter Queue (DLQ).
 * **Event-Driven Architecture:** Decouples API ingestion from background execution using Apache Kafka (`aiokafka`) topics and dedicated consumer groups.
 * **High-Performance Caching:** Utilizes Redis (`redis.asyncio`) for hot-state tracking (`PENDING`, `COMPLETED`, `FAILED`) with automatic 24-hour TTL expiration.
 * **Fail-Fast Core Engine:** Built with FastAPI and `pydantic-settings` to enforce strict environment configuration without implicit runtime fallbacks.
@@ -71,8 +74,11 @@ python -m venv venv
 source venv/bin/activate  # On Linux / WSL
 pip install -r requirements.txt
 
-# 5. Start API Gateway (Includes Producer & Background Consumer)
+# 5. Start API Gateway (Terminal 1)
 uvicorn app.main:app --reload --port 8000
+
+# 6. Start Background Worker (Terminal 2)
+python -m app.worker
 
 ```
 
@@ -93,3 +99,10 @@ pytest
 | `GET` | `/health` | Service health & version assertion | `200 OK` |
 | `POST` | `/api/v1/jobs` | Submit LLM job asynchronously via Kafka | `202 Accepted` |
 | `GET` | `/api/v1/jobs/{job_id}` | Poll execution status & output from Redis | `200 OK` / `404 Not Found` |
+
+---
+
+## API Documentation
+
+* **Swagger UI (Interactive docs):** [http://localhost:8000/docs](http://localhost:8000/docs)
+* **ReDoc (Alternative docs):** [http://localhost:8000/redoc](http://localhost:8000/redoc)
