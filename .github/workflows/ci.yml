@@ -59,6 +59,10 @@ jobs:
           DEFAULT_MODEL: "qwen2.5:3b"
           KAFKA_BOOTSTRAP_SERVERS: "localhost:9092"
           REDIS_URL: "redis://localhost:6379/0"
+          KAFKA_TOPIC_JOBS: "llm_jobs"
+          KAFKA_TOPIC_DLQ: "llm_jobs_dlq"
+          MAX_RETRIES: "3"
+          RETRY_BASE_DELAY_SEC: "1.0"
         run: |
           if [ -d tests ] || ls test_*.py &> /dev/null; then
             pytest
