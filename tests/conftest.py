@@ -22,8 +22,6 @@ def mock_infrastructure():
     with patch("app.services.kafka_producer.kafka_producer.start", new_callable=AsyncMock), \
          patch("app.services.kafka_producer.kafka_producer.stop", new_callable=AsyncMock), \
          patch("app.services.kafka_producer.kafka_producer.send_event", new_callable=AsyncMock), \
-         patch("app.services.kafka_consumer.kafka_consumer.start", new_callable=AsyncMock), \
-         patch("app.services.kafka_consumer.kafka_consumer.stop", new_callable=AsyncMock), \
          patch("app.services.redis_service.redis_service.connect", new_callable=AsyncMock), \
          patch("app.services.redis_service.redis_service.disconnect", new_callable=AsyncMock):
         yield
